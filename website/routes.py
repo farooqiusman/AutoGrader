@@ -8,10 +8,6 @@ import subprocess
 def home():
     return render_template('home.html')
 
-@app.route('/about', methods=['GET'])
-def about():
-    return render_template('about.html')
-
 @app.route('/a1', methods=['GET'])
 def a1():
     return render_template('a1.html')
@@ -30,18 +26,24 @@ def runcommand():
 
     # compile the program
     try:
+        os.system('rm website/static/java/A11.class')
         subprocess.run(['javac', 'website/static/java/A11.java'])
         if not os.path.exists('website/static/java/A11.class'):
             raise Exception()
     except:
+        os.system('rm website/static/java/A11.java')
         return "Your java program would not compile. 0 marks received."
 
     # run the program
     try:
         output = subprocess.check_output(['java', 'A11'], cwd='website/static/java', timeout=2).decode()
-        subprocess.run(['rm', 'website/static/java/A11.class'])
     except:
+        os.system('rm website/static/java/A11.class')
+        os.system('rm website/static/java/A11.java')
         return "Your java program compiled, but had a runtime error. 1 mark received."
+
+    os.system('rm website/static/java/A11.class')
+    os.system('rm website/static/java/A11.java')
 
     # program ran without error
     counts = [5, 4, 6, 7, 8, 9]
