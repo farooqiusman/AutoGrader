@@ -1,10 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
-from website import app, db
-from website.forms import Register, Login
-from website.models import User
-from flask_login import login_user, current_user, logout_user, login_required
+from website import app
 import os
-import bcrypt
+import subprocess
 
 @app.route('/home', methods=['GET'])
 @app.route('/', methods=['GET'])
@@ -15,46 +12,42 @@ def home():
 def about():
     return render_template('about.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    # we redirect the user if they're already authenticated
-    if current_user.is_authenticated:
-        flash('You are already authenticated','success')
-        return redirect(url_for('home'))
+@app.route('/a1', methods=['GET'])
+def a1():
+    return render_template('a1.html')
 
-    form = Register() # registration form
+@app.route('/run/a11', methods=['POST'])
+def runcommand():
 
-    # if the form is submitted and validated, we add the user
-    if form.validate_on_submit():
-        hashed = bcrypt.hashpw(form.password.data.encode('utf-8'), bcrypt.gensalt())
-        user = User(username=form.username.data, password=hashed)
-        db.session.add(user)
-        db.session.commit()
-        flash(f'Created account for {form.username.data}. You may now log in.', 'success')
-        return redirect(url_for('login'))
+    code = request.get_json()['code']
 
-    # else we return the register page
-    return render_template("register.html", form=form)
+    # create the program
+    with open('website/static/java/A11_template.java', 'r') as f:
+        A11template = f.read()
+    
+    with open('website/static/java/A11.java', 'w') as f:
+        f.write(A11template.replace('//IDENTIFIERCODEHERE', code).replace('A11_template', 'A11'))
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    # we redirect the user if they're already authenticated
-    if current_user.is_authenticated:
-        flash('You are already authenticated','success')
-        return redirect(url_for('home'))
+    # compile the program
+    try:
+        subprocess.run(['javac', 'website/static/java/A11.java'])
+        if not os.path.exists('website/static/java/A11.class'):
+            raise Exception()
+    except:
+        return "Your java program would not compile. 0 marks received."
 
-    form = Login()
-    # if the form is submitted and validated, we login the user
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user and bcrypt.checkpw(form.password.data.encode('utf-8'), user.password):
-            login_user(user, remember=form.rememberMe.data)
-            return redirect(url_for('home'))
-        else:
-            flash('Error Logging In', 'danger')
-    return render_template("login.html", form=form)
+    # run the program
+    try:
+        output = subprocess.check_output(['java', 'A11'], cwd='website/static/java', timeout=2).decode()
+        subprocess.run(['rm', 'website/static/java/A11.class'])
+    except:
+        return "Your java program compiled, but had a runtime error. 1 mark received."
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
+    # program ran without error
+    counts = [5, 4, 6, 7, 8, 9]
+    out = '<ul>'
+    output = output.split('\n')
+    for i in range(len(output)-1):
+        out+=f'<li>case {i+1} | received: {int(output[i]):02} | expected: {counts[i]:02}</li>'
+    out+='</ul>'
+    return out
