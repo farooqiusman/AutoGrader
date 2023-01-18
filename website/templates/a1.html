@@ -29,7 +29,7 @@
             let inp = document.getElementById(`a1${num}`).value;
             let resultElem = document.getElementById(`resa1${num}`);
             resultElem.innerHTML = 'loading...'
-            fetch(`/run/a1${num}`, {
+            fetch(`/run/a1/${num}`, {
                 method: 'POST',
                 body: JSON.stringify({code: inp}),
                 headers: {

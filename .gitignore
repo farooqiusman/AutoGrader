@@ -1,9 +1,8 @@
 # Project-specific
 config.json
-A11.java
-A11.class
-A12.java
-A12.class
+A1.java
+A1.class
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
