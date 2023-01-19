@@ -1,4 +1,5 @@
-# Flask Template
-A simple, fully-featured Flask web app template with **database** and **login** support set-up out of the box!
+# COMP-2140 Autograder
 
-## NOTE: Make sure you create a file called `config.json` which matches the formatting of `config-example.json`
+A simple, yet handy, interface for COMP-2140 students at the University of Windsor to test their code before submitting. Created for the Winter 2023 class.
+
+**NOTE:** This application was developed for UNIX-based operating systems. If you're a Windows user, you'll need to use the Windows Subsystem for Linux to run this application (or use Docker).
