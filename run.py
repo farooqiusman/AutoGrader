@@ -17,9 +17,9 @@ if __name__=='__main__':
     # for example, "python3 run.py PROD"
     if len(sys.argv) > 1:
         print('<< PROD >>')
-        os.system(f"python3 -m gunicorn -b '127.0.0.1:{data['port']}' website:app")
+        os.system(f"python3 -m gunicorn -b '0.0.0.0:{data['port']}' website:app")
     # or just run without an additional arg to run in debug
     # for example, "python3 run.py"
     else:
         print('<< DEBUG >>')
-        app.run(debug=True)
+        app.run(host='0.0.0.0', debug=True)
