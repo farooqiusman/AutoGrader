@@ -40,7 +40,7 @@ def runa1(id):
     except:
         os.system('rm website/static/java/A1.class')
         os.system('rm website/static/java/A1.java')
-        return "Your java program compiled, but had a runtime error. 1 mark received."
+        return "Your java program compiled, but either had a runtime error or ran for too long. 1 mark received."
 
     os.system('rm website/static/java/A1.class')
     os.system('rm website/static/java/A1.java')

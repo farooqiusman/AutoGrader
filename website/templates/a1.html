@@ -1,10 +1,22 @@
 {% extends 'layout.html' %}
 {% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/codemirror.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/dracula.css') }}">
     <div class="container">
         <h1>COMP-2140 Assignment 1 Autograder</h1>
         <br>
-        <div class="row bg-light p-4">
-            <div class="col-6">
+        <p>Paste your code below to check what your mark will be.</p>
+        <p>Test cases: 
+            <a href="{{ url_for('static', filename='java/A10.input') }}">A10.input</a>, 
+            <a href="{{ url_for('static', filename='java/A11.input') }}">A11.input</a>, 
+            <a href="{{ url_for('static', filename='java/A12.input') }}">A12.input</a>, 
+            <a href="{{ url_for('static', filename='java/A13.input') }}">A13.input</a>, 
+            <a href="{{ url_for('static', filename='java/A14.input') }}">A14.input</a>, 
+            <a href="{{ url_for('static', filename='java/A15.input') }}">A15.input</a>, 
+        </p>
+        <br>
+        <div class="row p-4">
+            <div class="col-md-6">
                 <h3>A11</h3>
                 <p>Paste ONLY your <strong>getIdentifiers</strong> function below, and click run</p>
                 <textarea name="a11" id="a11" rows="10" style="width: 90%;"></textarea><br>
@@ -13,10 +25,10 @@
                 <h4>Result:</h4>
                 <div id="resa11"></div>
             </div>
-            <div class="col-6">
+            <div class="col-md-6">
                 <h3>A12</h3>
                 <p>Paste ONLY your <strong>getIdRegex</strong> function below, and click run</p>
-                <textarea name="a12" id="a12" rows="10" style="width: 90%;"></textarea>
+                <textarea name="a12" id="a12" rows="10" style="width: 90%;"></textarea><br>
                 <button class="btn btn-primary" onclick="submitAssignment(2)">Submit A12</button>
                 <br><br>
                 <h4>Result:</h4>
@@ -24,8 +36,26 @@
             </div>
         </div>
     </div>
+    <script src="{{ url_for('static', filename='codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/clike.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/closebrackets.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/matchbrackets.js') }}"></script>
     <script>
+        var editorconf = {
+            // mode: "text/x-csharp",
+            mode: "text/x-java",
+            theme: "dracula",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true
+        };
+        var editors = [
+            CodeMirror.fromTextArea(document.getElementById('a11'), editorconf),
+            CodeMirror.fromTextArea(document.getElementById('a12'), editorconf)
+        ];
+        
         let submitAssignment = (num) => {
+            editors[num-1].save();
             let inp = document.getElementById(`a1${num}`).value;
             let resultElem = document.getElementById(`resa1${num}`);
             resultElem.innerHTML = 'loading...'
