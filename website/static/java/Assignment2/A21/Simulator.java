@@ -1,16 +1,17 @@
-/*
-SOLUTION BY JEREMIE BORNAIS
-*/
 public class Simulator {
-    public static boolean run(DFA dfa, String input) {
-        String s = dfa.startState;
-        String c;
-        for (int i = 0; i < input.length(); i++) {
-            c = input.substring(i, i + 1);
-            s = dfa.transitions.get(s + "_" + c);
+     public static boolean run(DFA dfa, String input){
+        String str = dfa.startState; // will get the current state
+        int i = 0;
+        Character c = (char)0; //make empty char
+        while(i != input.length()){
+            c = input.charAt(i); //get current char
+            str = dfa.transitions.get(str + "_" + c); // get next state
+            i++; // set i++, also next char
         }
-        if (dfa.finalStates.contains(s))
+        if(dfa.finalStates.contains(str) && c != null){
             return true;
+        }
         return false;
     }
+
 }

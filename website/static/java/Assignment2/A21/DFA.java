@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.io.*;
+import java.util.Scanner;
 
 public class DFA {
 	public static String [] alphabet;
@@ -62,11 +63,17 @@ public class DFA {
     
     public static void main(String[] args) throws Exception{
         DFA dfa = new DFA(args[0]);
-        String input = new BufferedReader(new FileReader(args[1])).readLine().strip();
-        boolean result=Simulator.run(dfa,input);
-        BufferedWriter bw=new BufferedWriter(new FileWriter(args[2]));
-        bw.write(result+"");
-        bw.close();
-        System.out.println(input+"\t"+result);
+        try{
+            Scanner scanner = new Scanner(new File(args[1]));
+            BufferedWriter bw=new BufferedWriter(new FileWriter(args[2]));
+            while(scanner.hasNextLine()){
+                boolean result = Simulator.run(dfa,scanner.nextLine());
+                bw.write(result+"\n");
+            }
+            bw.close();
+
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }
      }
 }

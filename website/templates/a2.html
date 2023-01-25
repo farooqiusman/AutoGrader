@@ -6,13 +6,30 @@
         <h1>COMP-2140 Assignment 2 Autograder</h1>
         <br>
         <p>Paste your code below to check what your mark will be.</p>
-        <p>Test cases: 
-            <a href="{{ url_for('static', filename='java/A10.input') }}">A10.input</a>, 
-            <a href="{{ url_for('static', filename='java/A11.input') }}">A11.input</a>, 
-            <a href="{{ url_for('static', filename='java/A12.input') }}">A12.input</a>, 
-            <a href="{{ url_for('static', filename='java/A13.input') }}">A13.input</a>, 
-            <a href="{{ url_for('static', filename='java/A14.input') }}">A14.input</a>, 
-            <a href="{{ url_for('static', filename='java/A15.input') }}">A15.input</a>, 
+        <p>DFA's For Testing: 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa0.txt') }}">DFA 0</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa1.txt') }}">DFA 1</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa2.txt') }}">DFA 2</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa3.txt') }}">DFA 3</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa4.txt') }}">DFA 4</a>, 
+        </p>
+        <p> Here are example strings corresponding to these DFA's
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa0_inputs.zip') }}">inputs 0 </a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa1_inputs.zip') }}">inputs 1</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa2_inputs.zip') }}">inputs 2</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa3_inputs.zip') }}">inputs 3</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa4_inputs.zip') }}">inputs 4</a>, 
+        </p>
+        <p> Please <strong>NOTE</strong> these input files are zip files that contain 4 input files each<br>
+            DFA.java reads 1 line from an input file at a time, we stronly suggest you unzip and run the files one at a time.<br>
+
+            <h3>How to run your code:</h3>
+            The syntax for running A11 is the following:<br><br>
+            &nbsp&nbsp&nbsp&nbsp <code> javac DFA.java <br> </code>
+            &nbsp&nbsp&nbsp&nbsp <code> java DFA dfa.txt input.txt output.txt </code> <br><br>
+            Where "dfa.txt", "input.txt" are the dfa input and example language input respectively. i.e dfa0.txt and dfa0.input_1.txt <br>
+
+            Your output will contain the example language string followed by a true/false based on if the example string is accepted or not.<br>
         </p>
         <br>
         <div class="row p-4">
@@ -59,7 +76,7 @@
             let inp = document.getElementById(`a2${num}`).value;
             let resultElem = document.getElementById(`resa2${num}`);
             resultElem.innerHTML = 'loading...'
-            fetch(`/run/a1/${num}`, {
+            fetch(`/run/a2/a2${num}`, {
                 method: 'POST',
                 body: JSON.stringify({code: inp}),
                 headers: {

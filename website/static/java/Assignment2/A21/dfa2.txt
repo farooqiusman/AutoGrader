@@ -3,6 +3,7 @@ A B C D E
 A
 A B E
 A a B
+A b A
 B 0 B
 B 1 B
 B b C
