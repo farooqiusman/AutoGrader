@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/codemirror.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/dracula.css') }}">
+    <div class="container">
+        <h1>COMP-2140 Assignment 2 Autograder</h1>
+        <br>
+        <p>Paste your code below to check what your mark will be.</p>
+        <p>Test cases: 
+            <a href="{{ url_for('static', filename='java/A10.input') }}">A10.input</a>, 
+            <a href="{{ url_for('static', filename='java/A11.input') }}">A11.input</a>, 
+            <a href="{{ url_for('static', filename='java/A12.input') }}">A12.input</a>, 
+            <a href="{{ url_for('static', filename='java/A13.input') }}">A13.input</a>, 
+            <a href="{{ url_for('static', filename='java/A14.input') }}">A14.input</a>, 
+            <a href="{{ url_for('static', filename='java/A15.input') }}">A15.input</a>, 
+        </p>
+        <br>
+        <div class="row p-4">
+            <div class="col-md-6">
+                <h3>A21</h3>
+                <p>Paste ONLY your <strong>run</strong> function below, and click run</p>
+                <textarea name="a21" id="a21" rows="10" style="width: 90%;"></textarea><br>
+                <button class="btn btn-primary" onclick="submitAssignment(1)">Run A11</button>
+                <br><br>
+                <h4>Result:</h4>
+                <div id="resa21"></div>
+            </div>
+            <div class="col-md-6">
+                <h3>A22</h3>
+                <p>Paste ONLY your <strong>A2.lex</strong> file below, and click run</p>
+                <textarea name="a22" id="a22" rows="10" style="width: 90%;"></textarea><br>
+                <button class="btn btn-primary" onclick="submitAssignment(2)">Run A12</button>
+                <br><br>
+                <h4>Result:</h4>
+                <div id="resa22"></div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/clike.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/closebrackets.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/matchbrackets.js') }}"></script>
+    <script>
+        var editorconf = {
+            // mode: "text/x-csharp",
+            mode: "text/x-java",
+            theme: "dracula",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true
+        };
+        var editors = [
+            CodeMirror.fromTextArea(document.getElementById('a21'), editorconf),
+            CodeMirror.fromTextArea(document.getElementById('a22'), editorconf)
+        ];
+        
+        let submitAssignment = (num) => {
+            editors[num-1].save();
+            let inp = document.getElementById(`a2${num}`).value;
+            let resultElem = document.getElementById(`resa2${num}`);
+            resultElem.innerHTML = 'loading...'
+            fetch(`/run/a1/${num}`, {
+                method: 'POST',
+                body: JSON.stringify({code: inp}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+                })
+                .then(res => res.text())
+                .then(data => resultElem.innerHTML = data)
+                .catch(error => console.error(error));
+
+        }
+    </script>
+{% endblock %}
