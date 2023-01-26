@@ -65,6 +65,7 @@ def runa21(id):
     code = request.get_json()['code']
 
     # create the program
+    rootdir = os.getcwd()
     os.chdir("website/static/java/Assignment2/A21")
     with open(f'Simulator_template.java', 'r') as f:
         A2template = f.read()
@@ -104,7 +105,10 @@ def runa21(id):
             
         expected_dfa['dfa {}'.format(i)] = answers
     
+    os.system("rm Simulator.java")
+    os.system("rm *.class")
    # program ran without error
+    os.chdir("../")
     out = '<ul>'
     output = output.split('\n')
     if len(dfa_map) == len(expected_dfa):
@@ -116,5 +120,5 @@ def runa21(id):
         out+='</ul>'
     else:
         out+= f'<li> Error in parsing received outputs and expected outputs'
-
+    os.chdir(rootdir)
     return out
