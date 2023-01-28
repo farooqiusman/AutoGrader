@@ -35,7 +35,7 @@
                 <h3>A21</h3>
                 <p>Paste ONLY your <strong>run</strong> function below, and click run</p>
                 <textarea name="a21" id="a21" rows="10" style="width: 90%;"></textarea><br>
-                <button class="btn btn-primary" onclick="submitAssignment(1)">Run A11</button>
+                <button class="btn btn-primary" id="a21button" onclick="submitAssignment(1)">Run A21</button>
                 <br><br>
                 <h4>Result:</h4>
                 <div id="resa21"></div>
@@ -44,7 +44,7 @@
                 <h3>A22</h3>
                 <p>Paste ONLY your <strong>A2.lex</strong> file below, and click run</p>
                 <textarea name="a22" id="a22" rows="10" style="width: 90%;"></textarea><br>
-                <button class="btn btn-primary" onclick="submitAssignment(2)">Run A12</button>
+                <button class="btn btn-primary" id="a22button" onclick="submitAssignment(2)">Run A22</button>
                 <br><br>
                 <h4>Result:</h4>
                 <div id="resa22"></div>
@@ -73,6 +73,8 @@
             editors[num-1].save();
             let inp = document.getElementById(`a2${num}`).value;
             let resultElem = document.getElementById(`resa2${num}`);
+            let a2button = document.getElementById(`a2${num}button`);
+            a2button.setAttribute("disabled", true);
             resultElem.innerHTML = 'loading...'
             fetch(`/run/a2/a2${num}`, {
                 method: 'POST',
@@ -82,7 +84,10 @@
                 }
                 })
                 .then(res => res.text())
-                .then(data => resultElem.innerHTML = data)
+                .then(data => {
+                    resultElem.innerHTML = data;   
+                    a2button.removeAttribute("disabled");
+                })
                 .catch(error => console.error(error));
 
         }
