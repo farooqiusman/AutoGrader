@@ -39,7 +39,7 @@ class assignment22:
             for line in f:
                 key, val = line.strip().split(":")
 
-                nested_dct[key] = val.strip()
+                nested_dct[key.strip()] = val.strip()
         
         return nested_dct
     
@@ -50,11 +50,11 @@ class assignment22:
             data = json.load(json_file) 
             for test_case in data.keys():
                 if test_case not in output_dict.keys():
-                    return "Not all test cases ran, please contact server owner<br>"
+                    return count, "Not all test cases ran, please contact server owner<br>"
                 else:
                     for key in data[test_case].keys():
                         if key not in output_dict[test_case].keys():
-                            return "<Key, Val> error, please contact server owner<br>"
+                            return count, f"Key: {key} not in {output_dict[test_case].keys()}"
                         else:
                             if int(data[test_case][key]) != int(output_dict[test_case][key]):
                                 output += ("Test Case: {0} Failed! <br>" 
