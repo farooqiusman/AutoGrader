@@ -1,0 +1,15 @@
+/** CORRECT "PROGRAM" & * & % @ ! */ WITH QSTRING A41.INPUT = 10 RESULT = 110 
+   Boolean expression definition is extended. 
+**/
+INT MAIN F()  
+BEGIN
+	INT X;
+	X :=3;
+	IF(TRUE) 
+	BEGIN
+        	READ(X,"../testcase/A4/A41");
+	END  ELSE BEGIN 
+		INT Y;
+	END
+	WRITE( X+100, "XKOUTPUT");
+END

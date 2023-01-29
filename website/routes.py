@@ -1,4 +1,5 @@
-from .assignment2 import assignment
+from .assignment21 import assignment21
+from .assignment22 import assignment22
 from flask import render_template, url_for, flash, redirect, request
 from website import app
 import os
@@ -64,8 +65,15 @@ def runa1(id):
 @app.route('/run/a2/<id>', methods=['POST'])
 def runa21(id):
     code = request.get_json()['code']
-    out = '<ul>'
-    assignment2 = assignment(subprocess, code)
-    out += assignment2.run_a21()
-    out += '</ul>'
-    return out
+    if id == "a21":
+        out = '<ul>'
+        assignment2 = assignment21(subprocess, code)
+        out += assignment2.run_a21()
+        out += '</ul>'
+        return out
+    else:
+        out = '<ul>'
+        assignment = assignment22(subprocess, code)
+        out += assignment.run_a22()
+        out += '</ul>'
+        return out

@@ -5,6 +5,7 @@
     <div class="container">
         <h1>COMP-2140 Assignment 2 Autograder</h1>
         <br>
+        <h3> A21 </h3>
         <p>Paste your code below to check what your mark will be.</p>
         <p>DFA's For Testing: 
             <a href="{{ url_for('static', filename='java/Assignment2/A21/dfa0.txt') }}">DFA 0</a>, 
@@ -28,6 +29,28 @@
             Where "dfa.txt", "input.txt" are the dfa input and example language input respectively. i.e dfa0.txt and dfa0.input_1.txt <br>
 
             Your output will contain the example language string followed by a true/false based on if the example string is accepted or not.<br>
+        </p>
+
+        <h3> A22 </h3>
+        <p>Paste your code below to check what your mark will be.</p>
+        <p> Here are input files that you can download
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_0.tiny') }}">A2_0.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_1.tiny') }}">A2_1.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_2.tiny') }}">A2_2.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_3.tiny') }}">A2_3.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_4.tiny') }}">A2_4.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_5.tiny') }}">A2_5.tiny</a>, 
+        </p>
+        <p> Please <strong>NOTE</strong> in order for A22 to run successfully on the site.<br>
+            You <strong>MUST</strong> replace your input file with <strong>A2.input.tiny</strong><br>
+            For example if your input file in your <strong>A2.lex</strong> is "A2.tiny" you must replace it with "A2.input.tiny"<br>
+
+            <h3>How to run your code:</h3>
+            Setup JLex on your machine from the following link: <a href="https://jlu.myweb.cs.uwindsor.ca/214/lab_4.htm">JLex_Setup</a><br>
+            After JLex is setup run your program with the following lines:<br>
+            &nbsp&nbsp&nbsp&nbsp <code> java JLex.Main A2.lex <br> </code>
+            &nbsp&nbsp&nbsp&nbsp <code> javac A2.lex.java </code> <br>
+            &nbsp&nbsp&nbsp&nbsp <code> java A2 </code> <br><br>
         </p>
         <br>
         <div class="row p-4">
@@ -73,8 +96,12 @@
             editors[num-1].save();
             let inp = document.getElementById(`a2${num}`).value;
             let resultElem = document.getElementById(`resa2${num}`);
-            let a2button = document.getElementById(`a2${num}button`);
-            a2button.setAttribute("disabled", true);
+            let a21button = document.getElementById(`a21button`);
+            a21button.setAttribute("disabled", true);
+
+            let a22button = document.getElementById(`a22button`);
+            a22button.setAttribute("disabled", true);
+
             resultElem.innerHTML = 'loading...'
             fetch(`/run/a2/a2${num}`, {
                 method: 'POST',
@@ -86,7 +113,8 @@
                 .then(res => res.text())
                 .then(data => {
                     resultElem.innerHTML = data;   
-                    a2button.removeAttribute("disabled");
+                    a21button.removeAttribute("disabled");
+                    a22button.removeAttribute("disabled");
                 })
                 .catch(error => console.error(error));
 
