@@ -53,7 +53,8 @@ class assignment22:
         rootdir = os.getcwd()
         assignment_dir = "website/static/java/Assignment2/A22"
         if os.getcwd() != assignment_dir:
-            os.chdir("website/static/java/Assignment2/A22")
+            os.chdir(os.path.join(rootdir, "website/static/java/Assignment2/A22"))
+
         unique_id = uuid.uuid1()
         unique_dir = f'assignment2_{unique_id}'
         out = ""
@@ -95,13 +96,18 @@ class assignment22:
         #Run JLex
         out = "Creating DFA from Lex file...<br>"
 
+        command = "java JLex.Main A2.lex"
+        proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
         try:
-            command = "java JLex.Main A2.lex"
-            proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-            stdout, stderr = proc.communicate()
+            stdout, stderr = proc.communicate(timeout=15)
             jLex_error = stderr.decode('utf-8')
             if jLex_error != "":
                 raise Exception()
+        except self.subprocess.TimeoutExpired:
+            proc.kill()
+            out += "Error: java JLex.Main A2.lex took too long to run. <br>"
+            self.remove_submission(unique_dir, rootdir)
+            return out
         except:
             self.remove_submission(unique_dir, rootdir)
             out += f"Error running command: <code>java JLex.Main A2.lex</code> <br><br>{jLex_error}"
@@ -121,13 +127,18 @@ class assignment22:
             out += "Error renaming file did you forget to name input file to \"A2.input.tiny\"?"
             return out
             
+        command = "javac A2.lex.java" 
+        proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
         try:
-            command = "javac A2.lex.java" 
-            proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-            stdout, stderr = proc.communicate()
+            stdout, stderr = proc.communicate(timeout=15)
             compile_error = stderr.decode('utf-8')
             if compile_error != "":
                 raise Exception()
+        except self.subprocess.TimeoutExpired:
+            proc.kill()
+            out += "Error: javac A2.lex.java took too long to compile. <br>"
+            self.remove_submission(unique_dir, rootdir)
+            return out
         except:
             self.remove_submission(unique_dir, rootdir)
             out += f"Error compiling A2.lex.java, command: <code>javac A2.lex.java</code> <br><br>{compile_error}"
@@ -138,17 +149,23 @@ class assignment22:
         #Running A2
         count = 0 
         for i in range(6):
+            command = f"java A2 ../A2_{i}.tiny"
+            proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
             try:
-                command = f"java A2 ../A2_{i}.tiny"
-                proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-                stdout, stderr = proc.communicate()
+                stdout, stderr = proc.communicate(timeout=15)
                 run_error = stderr.decode('utf-8')
                 if run_error != "":
                     raise Exception()
+            except self.subprocess.TimeoutExpired:
+                proc.kill()
+                out += "Error: Your code timed out. <br>"
+                self.remove_submission(unique_dir, rootdir)
+                return out
             except:
                 self.remove_submission(unique_dir, rootdir)
                 out += f"Run time error, command: <code>java A2 ../A2_{i}.tiny</code> <br><br>{run_error}"
                 return out
+
             
             #check output 
             with open('../answers.json', 'r') as json_file:

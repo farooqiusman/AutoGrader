@@ -17,7 +17,7 @@ class assignment21:
         rootdir = os.getcwd()
         assignment_dir = "website/static/java/Assignment2/A21"
         if os.getcwd() != assignment_dir:
-            os.chdir("website/static/java/Assignment2/A21")
+            os.chdir(os.path.join(rootdir, "website/static/java/Assignment2/A21"))
         unique_id = uuid.uuid1()
         unique_dir = f'Simulator_{unique_id}'
         # make a unique directory
