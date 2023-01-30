@@ -15,7 +15,9 @@ class assignment21:
     def run_a21(self):
         # store the root directory and change to assignment directory
         rootdir = os.getcwd()
-        os.chdir("website/static/java/Assignment2/A21")
+        assignment_dir = "website/static/java/Assignment2/A21"
+        if os.getcwd() != assignment_dir:
+            os.chdir("website/static/java/Assignment2/A21")
         unique_id = uuid.uuid1()
         unique_dir = f'Simulator_{unique_id}'
         # make a unique directory

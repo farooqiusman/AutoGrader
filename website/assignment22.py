@@ -18,20 +18,12 @@ class assignment22:
         with open(file, 'r') as f:
             fileinput = f.read()
         
-        if "A2.input.tiny" in fileinput:
+        if "\"A2.input.tiny\"" in fileinput:
             with open(file, 'w') as f:
-                f.write(fileinput.replace("A2.input.tiny", inputfile))
+                f.write(fileinput.replace("\"A2.input.tiny\"", inputfile))
             return True
 
         return False
-
-    def restore_input(self, file, inputfile):
-        with open(file, 'r') as f:
-            fileinput = f.read()
-
-        if inputfile in fileinput:
-            with open(file, 'w') as f:
-                f.write(fileinput.replace(inputfile, "A2.input.tiny"))
 
     def nested_dict_maker(self):
         nested_dct = {} 
@@ -43,32 +35,25 @@ class assignment22:
         
         return nested_dct
     
-    def check_runs(self, output_dict):
-        count = 0
+    def check_runs(self, output_dict, data, test_case):
         output = ""
-        with open('../answers.json', 'r') as json_file:
-            data = json.load(json_file) 
-            for test_case in data.keys():
-                if test_case not in output_dict.keys():
-                    return count, "Not all test cases ran, please contact server owner<br>"
-                else:
-                    for key in data[test_case].keys():
-                        if key not in output_dict[test_case].keys():
-                            return count, f"Key: {key} not in {output_dict[test_case].keys()}"
-                        else:
-                            if int(data[test_case][key]) != int(output_dict[test_case][key]):
-                                output += ("Test Case: {0} Failed! <br>" 
-                                "Expected output was: <br>&nbsp &nbsp &nbsp" 
-                                "{1}<br> Actual output was: <br>" 
-                                "&nbsp &nbsp &nbsp {2}".format(test_case, data[test_case], output_dict[test_case]))
-                                return count, output
-                count += 1
-        return count, output
+        for key in data.keys():
+            if key not in output_dict.keys():
+                return False, f"Error: key: {key} not in {output_dict}, please rename.<br>"
+            elif int(data[key]) != int(output_dict[key]):
+                output += ("Test Case: {0} Failed! <br>" 
+                "Expected output was: <br>&nbsp &nbsp &nbsp" 
+                "{1}<br> Actual output was: <br>" 
+                "&nbsp &nbsp &nbsp {2}".format(test_case, data, output_dict))
+                return False, output
+        return True, output
                                   
     def run_a22(self):
         # store the root directory and change to assignment directory
         rootdir = os.getcwd()
-        os.chdir("website/static/java/Assignment2/A22")
+        assignment_dir = "website/static/java/Assignment2/A22"
+        if os.getcwd() != assignment_dir:
+            os.chdir("website/static/java/Assignment2/A22")
         unique_id = uuid.uuid1()
         unique_dir = f'assignment2_{unique_id}'
         out = ""
@@ -126,34 +111,35 @@ class assignment22:
         out += f'<code>{output}</code>'
         
         output_dict = {}
+
+        #Compiling A2.lex.java
+        out += f"<br>Compiling A2.lex.java, command: <code>javac A2.lex.java </code><br>"
+
+        #Pre compile check and replace input file 
+        if not self.rename_input("A2.lex.java", f"argv[0]"):
+            self.remove_submission(unique_dir, rootdir)
+            out += "Error renaming file did you forget to name input file to \"A2.input.tiny\"?"
+            return out
+            
+        try:
+            command = "javac A2.lex.java" 
+            proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            compile_error = stderr.decode('utf-8')
+            if compile_error != "":
+                raise Exception()
+        except:
+            self.remove_submission(unique_dir, rootdir)
+            out += f"Error compiling A2.lex.java, command: <code>javac A2.lex.java</code> <br><br>{compile_error}"
+            return out
+
+        out += "A2.lex.java compiled successfully <br>"
+
+        #Running A2
+        count = 0 
         for i in range(6):
-            #Compiling A2.lex.java
-            out += f"<br>Compiling A2.lex.java with input A2_{i}.tiny, command: <code>javac A2.lex.java </code><br>"
-
-            #Pre compile check for inputfile:
-            if not self.rename_input("A2.lex.java", f"../A2_{i}.tiny"):
-                self.remove_submission(unique_dir, rootdir)
-                out += "Error renaming file did you forget to name input file to \"A2.input.tiny\"?"
-                return out
-                
             try:
-                command = "javac A2.lex.java" 
-                proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                compile_error = stderr.decode('utf-8')
-                if compile_error != "":
-                    raise Exception()
-            except:
-                self.remove_submission(unique_dir, rootdir)
-                out += f"Error compiling A2.lex.java, command: <code>javac A2.lex.java</code> <br><br>{jLex_error}"
-                return out
-
-            out += "A2.lex.java compiled successfully <br>"
-            self.restore_input("A2.lex.java", f"../A2_{i}.tiny")
-
-            #Running A2
-            try:
-                command = "java A2"
+                command = f"java A2 ../A2_{i}.tiny"
                 proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 run_error = stderr.decode('utf-8')
@@ -161,19 +147,27 @@ class assignment22:
                     raise Exception()
             except:
                 self.remove_submission(unique_dir, rootdir)
-                out += f"Run time error, command: <code>java A2 </code> <br><br>{run_error}"
+                out += f"Run time error, command: <code>java A2 ../A2_{i}.tiny</code> <br><br>{run_error}"
                 return out
             
             #check output 
-            output_dict[f"A2_{i}"] = self.nested_dict_maker()
-            
-        out += "<br> Running test Cases.... <br>"
-        count, string_out = self.check_runs(output_dict)
+            with open('../answers.json', 'r') as json_file:
+                data = json.load(json_file) 
+            out += f"<br> Running test Cases {i}.... <br>"
+            ret, string_out = self.check_runs(self.nested_dict_maker(), data[f"A2_{i}"], f"A2_{i}.tiny")
+            if ret and string_out == "":
+                string_out += "Test passed...<br>"
+                out += string_out
+                count +=1
+            else:
+                string_out += "Test failed...<br>"
+                out += string_out
+
         final_out = f"<br> {count}/6 Test cases ran successfully see below: <br>"
-        if string_out != "":
-            final_out += out + string_out
-        else:
+        if count == 6:
             final_out += out + "<br> All Tests passed!<br>"
+        else:
+            final_out += out 
         self.remove_submission(unique_dir, rootdir)
         return final_out.replace("\n", "<br>")
 
