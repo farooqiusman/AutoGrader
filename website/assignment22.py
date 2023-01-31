@@ -53,7 +53,7 @@ class assignment22:
         rootdir = os.getcwd()
         assignment_dir = "website/static/java/Assignment2/A22"
         if os.getcwd() != assignment_dir:
-            os.chdir(os.path.join(rootdir, "website/static/java/Assignment2/A22"))
+            os.chdir(os.path.abspath(assignment_dir))
 
         unique_id = uuid.uuid1()
         unique_dir = f'assignment2_{unique_id}'
