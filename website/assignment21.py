@@ -1,86 +1,141 @@
 import os
 import uuid
-import shutil
+import json
 class assignment21:
     def __init__(self, subprocess, code):
         self.subprocess = subprocess
         self.code = code
     
-    def remove_submission(self, unique_dir, rootdir): 
-        os.chdir('../')
-        os.system(f'rm -rf {unique_dir}')
-        os.chdir(rootdir)
+    def remove_submission(self, unique_dir): 
+        '''
+            Will remove the entire unique submission directory if code crashes 
+        '''
+        command = f"rm -rf {unique_dir}/"
+        self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
 
+
+    def nested_dict_maker(self, unique_dir):
+        '''
+            Will create a dictionary from the output file
+        '''
+        nested_dct = {} 
+        with open(f"{unique_dir}/output.txt", 'r') as f:
+            for line in f:
+                key, val = line.strip().split(":")
+
+                nested_dct[key.strip()] = val.strip()
+        
+        return nested_dct
+    
+    def check_runs(self, output_dict, data, test_case):
+        '''
+            Evaluate runs by checking values in both dictionaries and comparing them
+        '''
+        output = ""
+        for key in data.keys():
+            if key not in output_dict.keys():
+                return False, f"Error: key: {key} not in {output_dict}, please rename.<br>"
+            elif data[key] != output_dict[key]:
+                output += ("Expected output was: <br>&nbsp &nbsp &nbsp" 
+                "{1}<br> Actual output was: <br>" 
+                "&nbsp &nbsp &nbsp {2} <br>".format(test_case, data, output_dict))
+                return False, output
+        return True, output
+
+    def run_process(self, command, directory):
+        '''
+            will run a thread given the command and directory to run in
+            handling all errors and exceptions correctly
+        '''
+        print(command)
+        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
+        error = ""
+        out = ""
+        try:
+            stdout, stderr = proc.communicate(timeout=15)
+            error = stderr.decode('utf-8')
+            print(error)
+            if error != "":
+                raise Exception()
+        except self.subprocess.TimeoutExpired:
+            proc.kill()
+            out += f"Error running: <code>{command}</code> took too long to run. <br>"
+            self.remove_submission(directory)
+            return False, out
+        except:
+            self.remove_submission(directory)
+            formatted_error = error.replace("\n", "<br>")
+            out += f"Error running command: <code>{command}</code> <br><br>{formatted_error}"
+            return False, out
+        out += stdout.decode('utf-8').replace("\n", "<br>")
+        return True, out
 
     def run_a21(self):
         # store the root directory and change to assignment directory
-        rootdir = os.getcwd()
-        assignment_dir = "website/static/java/Assignment2/A21"
-        if os.getcwd() != assignment_dir:
-            os.chdir(os.path.abspath(assignment_dir))
-
         unique_id = uuid.uuid1()
-        unique_dir = f'Simulator_{unique_id}'
-        # make a unique directory
-        os.mkdir(unique_dir)
-        os.system(f'cp DFA.java {unique_dir}')
-        os.system(f'cp Simulator_template.java {unique_dir}')
+        assignment_dir = f"website/static/java/Assignment2/A21"
+        unique_dir = f'{assignment_dir}/assignment1_{unique_id}'
+        out = ""
 
-        with open(f'Simulator_template.java', 'r') as f:
+        #################### Setup Assignment Directory ####################
+        os.mkdir(unique_dir)
+        os.system(f'cp {assignment_dir}/DFA.java {unique_dir}')
+        os.system(f'cp {assignment_dir}/Simulator_template.java {unique_dir}')
+
+        with open(f'{unique_dir}/Simulator_template.java', 'r') as f:
             A2template = f.read()
         
-        os.chdir(unique_dir)
 
-        with open('Simulator.java', 'w') as f:
+        with open(f'{unique_dir}/Simulator.java', 'w') as f:
             f.write(A2template.replace('//INSERTCODEHERE', self.code))
 
-        # compile the program
-        try:
-            proc = self.subprocess.Popen("javac DFA.java", shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            error = stderr.decode('utf-8')
-            if not os.path.exists('DFA.class') or error != "":
-                raise Exception()
-        except:
-            print(error)
-            self.remove_submission(unique_dir, rootdir)
-            return "DFA.java failed to compile contact server owner to check for logs"
+        if os.path.getsize(f'{unique_dir}/Simulator.java') == 1:
+            out += "You did not submit anything.<br>"
+            self.remove_submission(unique_dir)
+            return out
 
-        # run the program
-        dfa_map = {}
-        expected_dfa = {}
-        error = ""
-        for i in range(4):
-            try:
-                command = "java DFA ../dfa{0}.txt ../dfa{0}.input.txt output.txt".format(i)
-                proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                error = stderr.decode('utf-8')
-                if error != "":
-                    raise Exception()
-            except:
-                self.remove_submission(unique_dir, rootdir)
-                return f"Your java program compiled, but either had a runtime error or ran for too long. 1 mark received.<br> The following is the error:<br><br>{error}"
+        #################### Compile DFA.java ####################
+        command = "javac DFA.java"
+        ret, perror = self.run_process(command, unique_dir)
 
-            with open(f'output.txt', 'r') as f:
-                outputs = f.read().split('\n')[:-1]
-
-            dfa_map['dfa {}'.format(i)] = outputs
-
-            with open('../answer_dfa{}.txt'.format(i), 'r') as f:
-                answers = f.read().split('\n')[:-1]
-                
-            expected_dfa['dfa {}'.format(i)] = answers
-        
-        out = "" 
-        if len(dfa_map) == len(expected_dfa):
-            for dfa in dfa_map.keys():
-                out+= f'<li>Output of {dfa}:<br>'
-                for i in range(len(dfa_map[dfa])):
-                    out+=f'&nbsp case {i}: <br> &nbsp &nbsp &nbsp received: {dfa_map[dfa][i]}, <br> &nbsp &nbsp &nbsp expected: {expected_dfa[dfa][i]}<br>'
-                out+= f'<br>'
+        if not ret:
+            out += perror
+            self.remove_submission(unique_dir)
+            return out.replace("\n", "<br>")
         else:
-            out+= f'<li> Error in parsing received outputs and expected outputs'
-        self.remove_submission(unique_dir, rootdir)
-        return out
+            out += "DFA.java compiled successfully.<br>"
+
+        #################### Run DFA.java ####################
+        count = 0
+        for i in range(4):
+            command = f"java DFA ../dfa{i}.txt ../dfa{i}.input.txt output.txt"
+            ret, perror = self.run_process(command, unique_dir)
+
+            if not ret:
+                out += perror
+                self.remove_submission(unique_dir)
+                return out.replace("\n", "<br>")
+
+            #check output 
+            with open(f'{assignment_dir}/answers.json', 'r') as json_file:
+                data = json.load(json_file) 
+            
+            out += f"<br> Running test Cases {i}.... <br>"
+            ret, string_out = self.check_runs(self.nested_dict_maker(unique_dir), data[f"dfa_{i}"], f"A2_{i}.tiny")
+            if ret and string_out == "":
+                string_out += "Test passed...<br>"
+                out += string_out
+                count +=1
+            else:
+                string_out += "Test failed...<br>"
+                out += string_out
+        
+        #################### Handle Test Passed ####################
+        final_out = f"<br> {count}/4 Test cases ran successfully see below: <br>"
+        if count == 4:
+            final_out += out + "<br> All Tests passed!<br>"
+        else:
+            final_out += out 
+        self.remove_submission(unique_dir)
+        return final_out.replace("\n", "<br>")
 

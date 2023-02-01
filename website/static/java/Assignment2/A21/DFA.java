@@ -66,9 +66,11 @@ public class DFA {
         try{
             Scanner scanner = new Scanner(new File(args[1]));
             BufferedWriter bw=new BufferedWriter(new FileWriter(args[2]));
+			int count = 0;
             while(scanner.hasNextLine()){
                 boolean result = Simulator.run(dfa,scanner.nextLine());
-                bw.write(result+"\n");
+                bw.write("case " + count +": " + result+"\n");
+				count ++;
             }
             bw.close();
 
