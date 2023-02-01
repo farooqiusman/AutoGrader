@@ -47,15 +47,45 @@ class assignment22:
                 "&nbsp &nbsp &nbsp {2}".format(test_case, data, output_dict))
                 return False, output
         return True, output
+
+    def run_process(self, command, directory, rootdir, unique_dir):
+        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
+        error = ""
+        out = ""
+        try:
+            stderr = proc.communicate(timeout=15)
+            error = stderr.decode('utf-8')
+            if error != "":
+                raise Exception()
+        except self.subprocess.TimeoutExpired:
+            proc.kill()
+            out += f"Error: <code>{command}<code> took too long to run. <br>"
+            self.remove_submission(unique_dir, rootdir)
+            return False, out
+        except:
+            self.remove_submission(unique_dir, rootdir)
+            formatted_error = error.replace("\n", "<br>")
+            out += f"Error running command: <code>{command}</code> <br><br>{formatted_error}"
+            return False, out
+        return out
+    
+    def process_setup(self, command, directory):
+        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
+        error = ""
+        out = ""
+        try:
+            stderr = proc.communicate(timeout=15)
+            error = stderr.decode('utf-8')
+            if error != "":
+                raise Exception()
+        except :
+            proc.kill()
+
                                   
     def run_a22(self):
         # store the root directory and change to assignment directory
-        rootdir = os.getcwd()
-        assignment_dir = "website/static/java/Assignment2/A22"
-        if os.getcwd() != assignment_dir:
-            os.chdir(os.path.abspath(assignment_dir))
-
         unique_id = uuid.uuid1()
+        assignment_dir = f"website/static/java/Assignment2/A22"
         unique_dir = f'assignment2_{unique_id}'
         out = ""
         # make a unique directory
