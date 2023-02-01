@@ -9,25 +9,26 @@ class assignment22:
         self.subprocess = subprocess
         self.code = code
     
-    def remove_submission(self, unique_dir, rootdir): 
-        os.chdir('../')
-        os.system(f'rm -rf {unique_dir}')
-        os.chdir(rootdir)
+    def remove_submission(self, unique_dir): 
+        command = f"rm -rf {unique_dir}/"
+        self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
 
-    def rename_input(self, file, inputfile):
-        with open(file, 'r') as f:
+         
+
+    def rename_input(self, file, inputfile, directory):
+        with open(f'{directory}/{file}', 'r') as f:
             fileinput = f.read()
         
         if "\"A2.input.tiny\"" in fileinput:
-            with open(file, 'w') as f:
+            with open(f'{directory}/{file}', 'w') as f:
                 f.write(fileinput.replace("\"A2.input.tiny\"", inputfile))
             return True
 
         return False
 
-    def nested_dict_maker(self):
+    def nested_dict_maker(self, unique_dir):
         nested_dct = {} 
-        with open("A2.output", 'r') as f:
+        with open(f"{unique_dir}/A2.output", 'r') as f:
             for line in f:
                 key, val = line.strip().split(":")
 
@@ -41,167 +42,131 @@ class assignment22:
             if key not in output_dict.keys():
                 return False, f"Error: key: {key} not in {output_dict}, please rename.<br>"
             elif int(data[key]) != int(output_dict[key]):
-                output += ("Test Case: {0} Failed! <br>" 
-                "Expected output was: <br>&nbsp &nbsp &nbsp" 
+                output += ("Expected output was: <br>&nbsp &nbsp &nbsp" 
                 "{1}<br> Actual output was: <br>" 
-                "&nbsp &nbsp &nbsp {2}".format(test_case, data, output_dict))
+                "&nbsp &nbsp &nbsp {2}.<br>".format(test_case, data, output_dict))
                 return False, output
         return True, output
 
-    def run_process(self, command, directory, rootdir, unique_dir):
-        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
+    def run_process(self, command, directory):
+        print(command)
+        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
         error = ""
         out = ""
         try:
-            stderr = proc.communicate(timeout=15)
+            stdout, stderr = proc.communicate(timeout=15)
             error = stderr.decode('utf-8')
+            print(error)
             if error != "":
                 raise Exception()
         except self.subprocess.TimeoutExpired:
             proc.kill()
-            out += f"Error: <code>{command}<code> took too long to run. <br>"
-            self.remove_submission(unique_dir, rootdir)
+            out += f"Error running: <code>{command}</code> took too long to run. <br>"
+            self.remove_submission(directory)
             return False, out
         except:
-            self.remove_submission(unique_dir, rootdir)
+            self.remove_submission(directory)
             formatted_error = error.replace("\n", "<br>")
             out += f"Error running command: <code>{command}</code> <br><br>{formatted_error}"
             return False, out
-        return out
+        out += stdout.decode('utf-8').replace("\n", "<br>")
+        return True, out
     
-    def process_setup(self, command, directory):
-        proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
-        error = ""
-        out = ""
-        try:
-            stderr = proc.communicate(timeout=15)
-            error = stderr.decode('utf-8')
-            if error != "":
-                raise Exception()
-        except :
-            proc.kill()
-
-                                  
     def run_a22(self):
         # store the root directory and change to assignment directory
         unique_id = uuid.uuid1()
         assignment_dir = f"website/static/java/Assignment2/A22"
-        unique_dir = f'assignment2_{unique_id}'
+        unique_dir = f'{assignment_dir}/assignment2_{unique_id}'
         out = ""
-        # make a unique directory
+
+        #################### Setup Assignment Directory ####################
         os.mkdir(unique_dir)
         os.mkdir(f'{unique_dir}/JLex')
 
-        os.system(f'cp a2_template.lex {unique_dir}')
-        os.system(f'cp Main.java {unique_dir}/JLex/')
+        os.system(f'cp {assignment_dir}/a2_template.lex {unique_dir}')
+        os.system(f'cp {assignment_dir}/Main.java {unique_dir}/JLex/')
 
-        with open('a2_template.lex', 'r') as f:
+        with open(f'{unique_dir}/a2_template.lex', 'r') as f:
             A2template = f.read()
         
-        os.chdir(unique_dir)
-        
-        with open('A2.lex', 'w') as f:
+
+        with open(f'{unique_dir}/A2.lex', 'w') as f:
             f.write(A2template.replace('//INSERTCODEHERE', self.code))
 
-        # setup JLex environment
+        if os.path.getsize(f'{unique_dir}/A2.lex') == 1:
+            out += "You did not submit anything.<br>"
+            self.remove_submission(unique_dir)
+            return out
+
+        #################### Setup JLex Directory ####################
+        error = ""
         try:
-            os.chdir('JLex')
             command = "ls | wc -l"
-            proc = self.subprocess.Popen("javac Main.java", shell=True)
+            proc = self.subprocess.Popen("cd JLex && javac Main.java", shell=True, cwd=unique_dir)
             while proc.poll() is None: 
                 time.sleep(1)
-            size = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
+            size = self.subprocess.Popen(command, shell=True, cwd=f'{unique_dir}/JLex', stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
             stdout, stderr = size.communicate()
             error = stdout.decode('utf-8')
             if int(error) != 27:
                 raise Exception()
         except:
-            print(error)
-            self.remove_submission(unique_dir, rootdir)
+            self.remove_submission(unique_dir)
             return f"JLex setup failed contact server owner to check for logs {error}"
         
         print("JLex Setup was a success")
-        os.chdir("../")
 
-        #Run JLex
+        #################### Run JLex ####################
         out = "Creating DFA from Lex file...<br>"
-
         command = "java JLex.Main A2.lex"
-        proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-        try:
-            stdout, stderr = proc.communicate(timeout=15)
-            jLex_error = stderr.decode('utf-8')
-            if jLex_error != "":
-                raise Exception()
-        except self.subprocess.TimeoutExpired:
-            proc.kill()
-            out += "Error: java JLex.Main A2.lex took too long to run. <br>"
-            self.remove_submission(unique_dir, rootdir)
+        ret, perror = self.run_process(command, unique_dir)
+        if not ret:
+            out += perror
+            self.remove_submission(unique_dir)
+            return out.replace("\n", "<br>")
+        elif "Error" in perror:
+            out += f"You have an error in your lex file please check the output below.<br><code>{perror}</code><br>"
+            self.remove_submission(unique_dir)
             return out
-        except:
-            self.remove_submission(unique_dir, rootdir)
-            out += f"Error running command: <code>java JLex.Main A2.lex</code> <br><br>{jLex_error}"
-            return out
+        else:
+            out += f'<code>{perror}</code>'
+    
+        print("JLex Ran fine")
 
-        output = stdout.decode('utf-8')
-        out += f'<code>{output}</code>'
-        
-        output_dict = {}
-
-        #Compiling A2.lex.java
+        #################### Compiling A2.lex.java ####################
         out += f"<br>Compiling A2.lex.java, command: <code>javac A2.lex.java </code><br>"
 
         #Pre compile check and replace input file 
-        if not self.rename_input("A2.lex.java", f"argv[0]"):
-            self.remove_submission(unique_dir, rootdir)
+        if not self.rename_input("A2.lex.java", f"argv[0]", unique_dir):
+            self.remove_submission(unique_dir)
             out += "Error renaming file did you forget to name input file to \"A2.input.tiny\"?"
             return out
-            
-        command = "javac A2.lex.java" 
-        proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-        try:
-            stdout, stderr = proc.communicate(timeout=15)
-            compile_error = stderr.decode('utf-8')
-            if compile_error != "":
-                raise Exception()
-        except self.subprocess.TimeoutExpired:
-            proc.kill()
-            out += "Error: javac A2.lex.java took too long to compile. <br>"
-            self.remove_submission(unique_dir, rootdir)
-            return out
-        except:
-            self.remove_submission(unique_dir, rootdir)
-            out += f"Error compiling A2.lex.java, command: <code>javac A2.lex.java</code> <br><br>{compile_error}"
-            return out
+        
+        print("renaming worked")
+        command = "mv A2.lex.java A2.java && javac A2.java" 
+        ret, perror = self.run_process(command, unique_dir)
+        if not ret:
+            out += perror
+            self.remove_submission(unique_dir)
+            return out.replace("\n", "<br>")
+        else:
+            out += "A2.lex.java compiled successfully <br>"
 
-        out += "A2.lex.java compiled successfully <br>"
-
-        #Running A2
+        #################### Run A2 ####################
         count = 0 
         for i in range(6):
             command = f"java A2 ../A2_{i}.tiny"
-            proc = self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
-            try:
-                stdout, stderr = proc.communicate(timeout=15)
-                run_error = stderr.decode('utf-8')
-                if run_error != "":
-                    raise Exception()
-            except self.subprocess.TimeoutExpired:
-                proc.kill()
-                out += "Error: Your code timed out. <br>"
-                self.remove_submission(unique_dir, rootdir)
-                return out
-            except:
-                self.remove_submission(unique_dir, rootdir)
-                out += f"Run time error, command: <code>java A2 ../A2_{i}.tiny</code> <br><br>{run_error}"
-                return out
-
+            ret, perror = self.run_process(command, unique_dir)
             
+            if not ret:
+                out += perror
+                self.remove_submission(unique_dir)
+                return out.replace("\n", "<br>")
             #check output 
-            with open('../answers.json', 'r') as json_file:
+            with open(f'{assignment_dir}/answers.json', 'r') as json_file:
                 data = json.load(json_file) 
             out += f"<br> Running test Cases {i}.... <br>"
-            ret, string_out = self.check_runs(self.nested_dict_maker(), data[f"A2_{i}"], f"A2_{i}.tiny")
+            ret, string_out = self.check_runs(self.nested_dict_maker(unique_dir), data[f"A2_{i}"], f"A2_{i}.tiny")
             if ret and string_out == "":
                 string_out += "Test passed...<br>"
                 out += string_out
@@ -210,11 +175,12 @@ class assignment22:
                 string_out += "Test failed...<br>"
                 out += string_out
 
+        #################### Handle Test Passed ####################
         final_out = f"<br> {count}/6 Test cases ran successfully see below: <br>"
         if count == 6:
             final_out += out + "<br> All Tests passed!<br>"
         else:
             final_out += out 
-        self.remove_submission(unique_dir, rootdir)
+        self.remove_submission(unique_dir)
         return final_out.replace("\n", "<br>")
 
