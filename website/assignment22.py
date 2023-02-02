@@ -19,22 +19,25 @@ class assignment22:
         with open(f'{directory}/{file}', 'r') as f:
             fileinput = f.read()
         
-        if "\"A2.input.tiny\"" in fileinput:
+        if "\"A2.input\"" in fileinput:
             with open(f'{directory}/{file}', 'w') as f:
-                f.write(fileinput.replace("\"A2.input.tiny\"", inputfile))
+                f.write(fileinput.replace("\"A2.input\"", inputfile))
             return True
 
         return False
 
     def nested_dict_maker(self, unique_dir):
-        nested_dct = {} 
-        with open(f"{unique_dir}/A2.output", 'r') as f:
-            for line in f:
-                key, val = line.strip().split(":")
+        nested_dct = {}
+        try:
+            with open(f"{unique_dir}/A2.output", 'r') as f:
+                for line in f:
+                    key, val = line.strip().split(":")
 
-                nested_dct[key.strip()] = val.strip()
+                    nested_dct[key.strip()] = val.strip()
+        except IOError as e:
+            return False, e
         
-        return nested_dct
+        return True, nested_dct
     
     def check_runs(self, output_dict, data, test_case):
         output = ""
@@ -47,7 +50,7 @@ class assignment22:
                 "&nbsp &nbsp &nbsp {2}.<br>".format(test_case, data, output_dict))
                 return False, output
         return True, output
-
+    
     def run_process(self, command, directory):
         print(command)
         proc = self.subprocess.Popen(command, shell=True, cwd=directory, stdout=self.subprocess.PIPE, stderr=self.subprocess.PIPE)
@@ -71,7 +74,7 @@ class assignment22:
             return False, out
         out += stdout.decode('utf-8').replace("\n", "<br>")
         return True, out
-    
+
     def run_a22(self):
         # store the root directory and change to assignment directory
         unique_id = uuid.uuid1()
@@ -139,7 +142,7 @@ class assignment22:
         #Pre compile check and replace input file 
         if not self.rename_input("A2.lex.java", f"argv[0]", unique_dir):
             self.remove_submission(unique_dir)
-            out += "Error renaming file did you forget to name input file to \"A2.input.tiny\"?"
+            out += "Error renaming file did you forget to name input file to \"A2.input\"?"
             return out
         
         print("renaming worked")
@@ -166,7 +169,14 @@ class assignment22:
             with open(f'{assignment_dir}/answers.json', 'r') as json_file:
                 data = json.load(json_file) 
             out += f"<br> Running test Cases {i}.... <br>"
-            ret, string_out = self.check_runs(self.nested_dict_maker(unique_dir), data[f"A2_{i}"], f"A2_{i}.tiny")
+
+            ret, nested_dict = self.nested_dict_maker(unique_dir)
+            if not ret:
+                out += f"<code>{nested_dict}</code> <br> Did you rename your outputfile to A2.output?<br>"
+                self.remove_submission(unique_dir)
+                return out.replace("\n", "<br>")
+
+            ret, string_out = self.check_runs(nested_dict, data[f"A2_{i}"], f"A2_{i}.tiny")
             if ret and string_out == "":
                 string_out += "Test passed...<br>"
                 out += string_out

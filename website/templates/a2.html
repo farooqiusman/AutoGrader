@@ -42,16 +42,17 @@
             <a href="{{ url_for('static', filename='java/Assignment2/A22/A2_5.tiny') }}">A2_5.tiny</a>, 
         </p>
         <p> Please <strong>NOTE</strong> in order for A22 to run successfully on the site.<br>
-            You <strong>MUST</strong> replace your input file with <strong>A2.input.tiny</strong><br>
-            For example if your input file in your <strong>A2.lex</strong> is "A2.tiny" you must replace it with "A2.input.tiny" with the quotes<br>
+            You <strong>MUST</strong> replace your input file with <strong>A2.input</strong><br>
+            For example if your input file in your <strong>A2.lex</strong> is "A2.tiny" you must replace it with "A2.input" with the quotes<br>
             Your output file <strong>MUST</strong> be A2.output. <br>
             Your counting variables <strong>MUST</strong> be named the identifiers, keywords, numbers, comments, quotedString respectively.<br>
 
             <h3>How to run your code:</h3>
-            Setup JLex on your machine from the following link: <a href="https://jlu.myweb.cs.uwindsor.ca/214/lab_4.htm">JLex_Setup</a><br>
+            Setup JLex on your machine from the following link: <a href="https://blog.bornais.ca/2022/04/16/setting-up-jlex.html">JLex_Setup</a><br>
             After JLex is setup run your program with the following lines:<br>
             &nbsp&nbsp&nbsp&nbsp <code> java JLex.Main A2.lex <br> </code>
-            &nbsp&nbsp&nbsp&nbsp <code> javac A2.lex.java </code> <br>
+            &nbsp&nbsp&nbsp&nbsp <code> mv A2.lex.java A2.java <br> </code>
+            &nbsp&nbsp&nbsp&nbsp <code> javac A2.java </code> <br>
             &nbsp&nbsp&nbsp&nbsp <code> java A2 </code> <br><br>
         </p>
         <br>
