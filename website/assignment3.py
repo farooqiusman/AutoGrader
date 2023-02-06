@@ -3,7 +3,7 @@ import uuid
 import time
 import json
 
-class assignment22:
+class assignment3:
     def __init__(self, subprocess, code):
         self.subprocess = subprocess
         self.code = code
@@ -77,7 +77,7 @@ class assignment22:
     def run_a22(self):
         # store the root directory and change to assignment directory
         unique_id = uuid.uuid1()
-        assignment_dir = f"website/static/java/Assignment2/A22"
+        assignment_dir = f"website/static/java/assignment3/"
         unique_dir = f'{assignment_dir}/assignment2_{unique_id}'
         out = ""
 
@@ -192,4 +192,5 @@ class assignment22:
             final_out += out 
         self.remove_submission(unique_dir)
         return final_out.replace("\n", "<br>")
+
 
