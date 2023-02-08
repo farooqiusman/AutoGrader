@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/codemirror.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/dracula.css') }}">
+    <div class="container">
+        <h1>COMP-2140 Assignment 3 Autograder</h1>
+        <br>
+        <h3> A3 </h3>
+		<p>Paste your code below to check what your mark will be.<br></p>
+		<p> Enter your student number: <input type="text" pattern="[0-9]*" name="studendid" id="stdu" rows="1" style="width: 10%;"></input><br>
+        <br>
+        <div class="row p-4">
+            <div class="col-md-6">
+                <h3>A3.lex</h3>
+                <p>Paste ONLY your <strong>lex file</strong> below, and click submit</p>
+                <textarea name="a3lex" id="a31" rows="10" style="width: 90%;"></textarea><br>
+                <br><br>
+            </div>
+            <div class="col-md-6">
+                <h3>A3.cup</h3>
+                <p>Paste ONLY your <strong>A3.cup</strong> file below, and click run</p>
+                <textarea name="a3cup" id="a32" rows="10" style="width: 90%;"></textarea><br>
+                <button class="btn btn-primary" id="a3cup" onclick="submitAssignment(2)">Run A3</button>
+                <br><br>
+            </div>
+        </div>
+		<h4>Result:</h4>
+		<div id="resa32"></div>
+    </div>
+    <script src="{{ url_for('static', filename='codemirror/codemirror.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/clike.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/closebrackets.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/matchbrackets.js') }}"></script>
+    <script>
+        var editorconf = {
+            // mode: "text/x-csharp",
+            mode: "text/x-java",
+            theme: "dracula",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true
+        };
+        var editors = [
+            CodeMirror.fromTextArea(document.getElementById('a31'), editorconf),
+            CodeMirror.fromTextArea(document.getElementById('a32'), editorconf)
+        ];
+        
+        let submitAssignment = (num) => {
+            editors[num-1].save();
+            let lex = document.getElementById(`a31`).value;
+			let cup = document.getElementById('a32').value
+			let stdu = document.getElementById('stdu').value;
+            let resultElem = document.getElementById(`resa32`);
+            let a3button = document.getElementById(`a3cup`);
+			a3button.setAttribute("disabled", true)
+
+
+            resultElem.innerHTML = 'loading...'
+            fetch(`/run/a3`, {
+                method: 'POST',
+                body: JSON.stringify({code_lex:lex,
+				code_cup: cup, stdu_id: stdu}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+                })
+                .then(res => res.text())
+                .then(data => {
+                    resultElem.innerHTML = data;
+					a3button.removeAttribute("disabled")
+                })
+                .catch(error => console.error(error));
+
+        }
+    </script>
+{% endblock %}
