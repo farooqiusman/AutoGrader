@@ -1,5 +1,6 @@
 from .assignment21 import assignment21
 from .assignment22 import assignment22
+from website.assignment3 import assignment3
 from flask import render_template, url_for, flash, redirect, request
 from website import app
 import os
@@ -18,6 +19,10 @@ def a1():
 @app.route('/a2', methods=['GET'])
 def a2():
     return render_template('a2.html')
+
+@app.route('/a3', methods=['GET'])
+def a3():
+    return render_template('a3.html')
 
 @app.route('/run/a1/<id>', methods=['POST'])
 def runa1(id):
@@ -77,3 +82,14 @@ def runa21(id):
         out += assignment.run_a22()
         out += '</ul>'
         return out
+
+@app.route('/run/a3', methods=['POST'])
+def runa3():
+    code_lex = request.get_json()['code_lex']
+    code_cup = request.get_json()['code_cup']
+    stdu_id = request.get_json()['stdu_id']
+    assig3 = assignment3(subprocess, code_lex, code_cup, stdu_id)
+    out = '<ul>'
+    out += assig3.run_a3()
+    out += "<br><br> SUBMIT WORKED </ul>"
+    return out
