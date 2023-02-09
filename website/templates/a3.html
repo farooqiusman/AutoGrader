@@ -19,8 +19,8 @@
             <div class="col-md-6">
                 <h3>A3.cup</h3>
                 <p>Paste ONLY your <strong>A3.cup</strong> file below, and click run</p>
-                <textarea name="a3cup" id="a32" rows="10" style="width: 90%;"></textarea><br>
-                <button class="btn btn-primary" id="a3cup" onclick="submitAssignment(2)">Run A3</button>
+                <textarea name="a3cuptext" id="a32" rows="10" style="width: 90%;"></textarea><br>
+                <button class="btn btn-primary" id="a3cup" onclick="submitAssignment();">Run A3</button>
                 <br><br>
             </div>
         </div>
@@ -45,8 +45,9 @@
             CodeMirror.fromTextArea(document.getElementById('a32'), editorconf)
         ];
         
-        let submitAssignment = (num) => {
-            editors[num-1].save();
+        let submitAssignment = () => {
+			editors[0].save();
+			editors[1].save();
             let lex = document.getElementById('a31').value;
 			let cup = document.getElementById('a32').value;
 			let stdu = document.getElementById('stdu').value;
