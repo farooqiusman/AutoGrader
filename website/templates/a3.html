@@ -7,8 +7,8 @@
         <br>
         <h3> A3 </h3>
 		<p>Paste your code below to check what your mark will be.<br></p>
-		<p> Enter your student number: <input type="text" pattern="[0-9]*" name="studendid" id="stdu" rows="1" style="width: 10%;"></input><br>
-        <br>
+		<p> Enter your student id without '@uwindsor.ca', for example farooqiu@uwindsor.ca would be farooqiu<br></p>
+		<p> uwinid: <input type="text" name="studendid" id="stdu" rows="1" style="width: 10%;"></input></p>
         <div class="row p-4">
             <div class="col-md-6">
                 <h3>A3.lex</h3>
@@ -47,8 +47,8 @@
         
         let submitAssignment = (num) => {
             editors[num-1].save();
-            let lex = document.getElementById(`a31`).value;
-			let cup = document.getElementById('a32').value
+            let lex = document.getElementById('a31').value;
+			let cup = document.getElementById('a32').value;
 			let stdu = document.getElementById('stdu').value;
             let resultElem = document.getElementById(`resa32`);
             let a3button = document.getElementById(`a3cup`);
@@ -58,7 +58,7 @@
             resultElem.innerHTML = 'loading...'
             fetch(`/run/a3`, {
                 method: 'POST',
-                body: JSON.stringify({code_lex:lex,
+                body: JSON.stringify({code_lex: lex,
 				code_cup: cup, stdu_id: stdu}),
                 headers: {
                     'Content-Type': 'application/json'
