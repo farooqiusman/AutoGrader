@@ -3,7 +3,6 @@ import uuid
 import json
 import time
 from .helper import static_methods
-from mysql.connector import connect, Error
 from dotenv import load_dotenv
 
 class assignment3:
@@ -14,24 +13,6 @@ class assignment3:
         self.stduID = stduID
         self.sql_connection = None
     
-    def remove_submission(self, unique_dir): 
-        command = f"rm -rf {unique_dir}/"
-        self.subprocess.Popen(command, shell=True, stdout=self.subprocess.PIPE, stderr=self.subprocess.STDOUT)
-
-    def connect_to_sql(self, user, host, password, database):
-        cnx = None
-        try:
-            cnx = connect(
-                host = host,
-                user = user,
-                password = password,
-                database=database,
-            )
-            print("Database connection success")
-        except Error as e:
-            print(e)
-        return cnx
-
     def check_student_id(self):
         try:
             query = f'SELECT name, uwinID from students where user like "%{self.stduID}%";'
@@ -70,7 +51,7 @@ class assignment3:
             out += "Please enter a valid student number.<br>"
             return out
 
-        self.sql_connection = self.connect_to_sql(user, host, password, database)
+        self.sql_connection = static_methods.connect_to_sql(user, host, password, database)
         if self.sql_connection == None:
             out += "Error connecting to sql database please contact server owner"
             return out
@@ -82,7 +63,7 @@ class assignment3:
             out += "Contact server owner.\n"
             return out.replace("\n", "<br>")
         
-        out += f'{name}, {uwinid}\n'
+        out += f'{name}, {uwinid}<br>'
 
         if self.lex_code == "": 
             out += "Please submit your lex file"
@@ -93,7 +74,7 @@ class assignment3:
         unique_dir = f'{assignment_dir}/{user_dir}'
         
         if os.path.exists(unique_dir):
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             print("Cleaning up working DIR")
             time.sleep(1)
             os.mkdir(unique_dir)
@@ -105,49 +86,88 @@ class assignment3:
         ret, perror = self.generate_file_from_template(f'{unique_dir}/a3_template.lex', f'{unique_dir}/A3.lex', self.lex_code)
         if not ret:
             out += perror
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             return out.replace('\n', '<br>')
 
         print("Created A3.lex")
 
         ###########################  Run Lex file ###########################
-        out = "Creating DFA from Lex file...<br>"
+        out += "Creating DFA from Lex file...<br>"
         command = f'java JLex.Main {user_dir}/A3.lex'
+        out += "Running: java JLex.Main A3.lex <br>"
         ret, perror = static_methods.run_process(self.subprocess, command, assignment_dir)
         if not ret:
             out += perror
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             return out.replace("\n", "<br>")
         elif "Error" in perror:
             out += f"You have an error in your lex file please check the output below.<br><code>{perror}</code><br>"
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             return out
         else:
             out += f'<code>{perror}</code>'
     
         print("JLex Ran fine")
 
+        ###########################  Install JavaCup for User ###########################
+        os.system(f'cp {assignment_dir}/javaCup.tar {unique_dir}')
+        command = 'tar -xvf javaCup.tar'
+        ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
+        if not ret:
+            out += f"Error installing javaCup please contact server owner.<br>{perror}"
+            static_methods.remove_submission(self.subprocess, unique_dir)
+            return out.replace('\n', '<br>')
+        print("Java cup installed fine")
+
         ###########################  Generate files using Cup file ###########################
         os.system(f'cp {assignment_dir}/a3_template.cup {unique_dir}')
         ret, perror = self.generate_file_from_template(f'{unique_dir}/a3_template.cup', f'{unique_dir}/A3.cup', self.cup_code)
         if not ret:
             out += perror
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             return out.replace('\n', '<br>')
 
         out += "Generated A3.lex.java<br>"
         if self.cup_code == "":
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             out += "You did not submit a cup file.\n"
             return out.replace('\n', '<br>')
-        command = f'java java_cup.Main -parser {user_dir}/A3Parser -symbols {user_dir}/A3Symbol < {user_dir}/A3.cup'
-        ret, perror = static_methods.run_process(self.subprocess, command, assignment_dir)
-        print(ret)
+
+        command = f'java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup 2>&1'
+        out += "Running: java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup <br>"
+        ret, perror = static_methods.run_cup(self.subprocess, command, unique_dir)
         if not ret:
             out += perror
-            self.remove_submission(unique_dir)
+            static_methods.remove_submission(self.subprocess, unique_dir)
             return out.replace('\n', '<br>')
+        out += f'<code>{perror}</code>'
+        out += "A3Parser, A3Symbol generated. <br>"
         print("Command ran fine")
+
+        ########################### Compile lex, parser, symbol and user file ###########################
+        os.system(f'cp {assignment_dir}/A3User.java {unique_dir}')
+        command = 'javac A3.lex.java A3Parser.java A3Symbol.java A3User.java'
+        out += f'Running: {command}<br>'
+        ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
+        if not ret:
+            out += perror
+            static_methods.remove_submission(self.subprocess, unique_dir)
+            return out.replace('\n', '<br>')
+        out += "All files compiled successfully.<br>"
+        print("Compiling files ran fine")
+
+        ########################### Run Code using A3User.java ###########################
+        for i in range(5):
+            out += f'Running A3_{i+1}.tiny <br>'
+            command = f'java A3User ../A3_{i+1}.tiny'
+            ret, perror = static_methods.run_code(self.subprocess, command, unique_dir)
+            if not ret:
+                out += perror
+                # static_methods.remove_submission(self.subprocess, unique_dir)
+            command = f'cat A3.output'
+            ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
+            out += perror
+            out += "<br>"
 
         # self.remove_submission(unique_dir)
         return out.replace('\n', '<br>')

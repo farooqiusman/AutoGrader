@@ -1,0 +1,98 @@
+import java.io.*;
+
+/* Terminals (tokens returned by the scanner). */
+terminal String   PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN, IF, ID, QUOTES, COMMA, WRITE, READ, ELSE, RETURN, BEGIN, END, MAIN, TYPE, SEMI, EQ, ASIGN, NOTEQUAL;
+terminal Integer  NUMBER;
+
+/* Non terminals */
+non terminal Integer funcdef, BLOCK, STATEMENT, AssignSmt, Expression, AccParen, BoolExpr, FormalParam, LocalVar, ReturnSmt, IfSmt, WriteSmt, ReadSmt, Program, MultiExpre, PrimaryExpre, StatementList, OptinalParam, ParamList, expr, PrimaryExpreR, AccParenR;
+
+/* Precedences */
+precedence left ELSE;
+
+/* The grammar */
+Program ::=  funcdef {: RESULT = 1; :}
+            |Program :e funcdef {: RESULT = e + 1; :}
+            ;
+
+
+funcdef ::=      TYPE MAIN ID LPAREN OptinalParam RPAREN BLOCK
+                |TYPE ID LPAREN OptinalParam RPAREN BLOCK 
+                ;
+
+
+OptinalParam ::=  ParamList
+                 |
+                 ;
+
+ParamList ::= ParamList COMMA FormalParam
+              |FormalParam
+              ;
+
+FormalParam ::= TYPE ID;
+
+BLOCK ::=       BEGIN StatementList END
+                ;
+
+
+STATEMENT ::=    BLOCK
+                | LocalVar
+                | AssignSmt 
+                | ReturnSmt 
+                | IfSmt 
+                | WriteSmt 
+                | ReadSmt 
+                ;
+StatementList ::=  STATEMENT
+                  |StatementList STATEMENT 
+                  ;
+
+LocalVar ::= TYPE ID SEMI
+             |TYPE AssignSmt
+             ;
+
+AssignSmt ::= ID ASIGN Expression SEMI
+             |ID ASIGN QUOTES SEMI
+             ;
+
+ReturnSmt ::= RETURN Expression SEMI;
+
+IfSmt ::=    IF LPAREN BoolExpr RPAREN STATEMENT
+            |IF LPAREN BoolExpr RPAREN STATEMENT ELSE STATEMENT
+            ;
+WriteSmt ::= WRITE LPAREN Expression COMMA QUOTES RPAREN SEMI;
+
+ReadSmt ::= READ LPAREN ID COMMA QUOTES RPAREN SEMI;
+
+Expression ::=   MultiExpre expr
+                ;
+
+expr ::=  PLUS MultiExpre expr
+         |MINUS MultiExpre expr
+         |
+         ;
+MultiExpre ::=   PrimaryExpre PrimaryExpreR 
+                ;
+PrimaryExpre ::= NUMBER
+                |ID
+                |LPAREN Expression RPAREN
+                |ID LPAREN AccParen RPAREN
+                ;
+
+PrimaryExpreR ::= TIMES PrimaryExpre PrimaryExpreR
+                 | DIVIDE PrimaryExpre PrimaryExpreR 
+                 |
+                 ;
+
+BoolExpr ::=     Expression EQ Expression 
+                |Expression NOTEQUAL Expression
+                ;
+AccParen ::= Expression AccParenR 
+             |
+             ;
+
+AccParenR ::= COMMA Expression AccParenR 
+            |
+            ;
+
+
