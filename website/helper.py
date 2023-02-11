@@ -69,23 +69,45 @@ class static_methods:
     @staticmethod
     def run_code(subprocess, command, directory):
         print(command)
-        proc = subprocess.Popen(command, shell=True, cwd=directory, stdout=subprocess.PIPE)
+        proc = subprocess.Popen(command, shell=True, cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = ""
-        std = ""
+        error = ""
         try:
-            stdout = proc.communicate(timeout=15)[0]
-            std = stdout.decode('utf-8')
-            print(std)
-            if "# Goto state #-1" not in std:
+            stdout, stderr = proc.communicate(timeout=15)
+            error = stderr.decode('utf-8')
+            # print(std)
+            if "Syntax error" in error:
                 raise Exception()
         except subprocess.TimeoutExpired:
             proc.kill()
             out += f"Error running: <code>{command}</code> took too long to run. <br>"
             return False, out
         except:
-            out += f"Error running command: <code>{command}</code><br><code>{std}</code>"
+            out += f"Error running command: <code>{command}</code><br>"
             return False, out.replace('\n', '<br>')
-        out += std
+        out += stdout.decode('utf-8')
+        return True, out.replace('\n', '<br>')
+    
+    @staticmethod
+    def debug_code(subprocess, command, directory):
+        print(command)
+        proc = subprocess.Popen(command, shell=True, cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out = ""
+        error = ""
+        try:
+            stdout, stderr = proc.communicate(timeout=15)
+            error = stderr.decode('utf-8')
+            # print(error)
+            if "Syntax error" in error:
+                raise Exception()
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out += f"Error running: <code>{command}</code> took too long to run. <br>"
+            return False, out
+        except:
+            out += f"Error running command: <code>{command}<br>{error}</code><br>"
+            return False, out.replace('\n', '<br>')
+        out += stdout.decode('utf-8')
         return True, out.replace('\n', '<br>')
 
     @staticmethod

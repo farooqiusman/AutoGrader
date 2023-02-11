@@ -88,7 +88,8 @@ def runa3():
     code_lex = request.get_json()['code_lex']
     code_cup = request.get_json()['code_cup']
     stdu_id = request.get_json()['stdu_id']
-    assig3 = assignment3(subprocess, code_lex, code_cup, stdu_id)
+    debug_code = request.get_json()['debug_box']
+    assig3 = assignment3(subprocess, code_lex, code_cup, stdu_id, debug_code)
     out = '<ul>'
     out += assig3.run_a3()
     out += "<br><br> SUBMIT WORKED </ul>"

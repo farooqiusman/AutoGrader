@@ -1,9 +1,35 @@
-INT MAIN F2() /** CORRECT PROGRAM. OUTPUT: 25. A41.INPUT --> 10 **/
-   INT X;
-   X  := 5;
-   BEGIN
-	INT Z; 
-	READ(Z, "../testcase/A4/A41");
-	WRITE(X+Z*2, "XKOUTPUT");
-   END	
- END
+/** sahftrjhesj ew**
+**/
+INT f(INT x, INT y ) 
+BEGIN
+    z:=x; 
+    z := x*x - y*y;
+    RETURN x+z;
+END 
+
+STRING f6()
+BEGIN
+    a:=f2();
+END
+
+INT MAIN f1() 
+BEGIN
+    /**
+    REAL x;
+    READ(x, "A41.input");
+    REAL y;
+    READ(y, "A42.input");
+    INT z;
+
+    z:=0; 
+    IF (x!=y) z := f2(x,y) + f2(y,x); 
+    WRITE (z, "A4.output"); 
+    **/
+    a:=2;
+    INT a;
+    IF (a==2)
+        BEGIN
+            a:=3+a/2;
+        END
+    c:=f3(a);
+ END 

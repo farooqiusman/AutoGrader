@@ -1,0 +1,5 @@
+INT MAIN F2() /** INCORRECT PROGRAM. scanner should catch all the input **/
+BEGIN
+INT X;
+@#$%^
+END

@@ -1,6 +1,5 @@
-
-INT MAIN F2() /**  CORRECT PROGRAM. FUNCTION CALLS. OUTPUT := 12.5
-	test br. jianguo 2019.**/
+INT MAIN F2() /**  CORRECT PROGRAM. MULTIPLE FUNCTION CALLS. OUTPUT = 4
+	test br. usman 2022.**/
 BEGIN  
    INT A;
    A := F1(3);
@@ -18,5 +17,14 @@ REAL F2(INT A1, REAL A2)
 BEGIN
   REAL br;
   br := A1 + A2;
+  br := br * F3(A1, A2);
   RETURN br;
 END
+
+INT F3(REAL br, INT x)
+BEGIN
+	INT y;
+	y := br * x;
+	RETURN y;
+END
+
