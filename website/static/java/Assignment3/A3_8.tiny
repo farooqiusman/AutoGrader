@@ -1,0 +1,7 @@
+/** incorrect program.
+**/
+
+INT f_1 ()  /** underscore is not allowed in identifiers **/
+BEGIN 
+ INT x:=y;     
+END

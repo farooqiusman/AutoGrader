@@ -1,17 +1,17 @@
 import os
-import uuid
 import json
 import time
 from .helper import static_methods
 from dotenv import load_dotenv
 
 class assignment3:
-    def __init__(self, subprocess, lex_code, cup_code, stduID):
+    def __init__(self, subprocess, lex_code, cup_code, stduID, debug_code):
         self.subprocess = subprocess
         self.lex_code = lex_code
         self.cup_code = cup_code
         self.stduID = stduID
         self.sql_connection = None
+        self.debug_code = debug_code
     
     def check_student_id(self):
         try:
@@ -94,7 +94,7 @@ class assignment3:
         ###########################  Run Lex file ###########################
         out += "Creating DFA from Lex file...<br>"
         command = f'java JLex.Main {user_dir}/A3.lex'
-        out += "Running: java JLex.Main A3.lex <br>"
+        out += "Running: <code>java JLex.Main A3.lex</code> <br>"
         ret, perror = static_methods.run_process(self.subprocess, command, assignment_dir)
         if not ret:
             out += perror
@@ -134,7 +134,7 @@ class assignment3:
             return out.replace('\n', '<br>')
 
         command = f'java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup 2>&1'
-        out += "Running: java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup <br>"
+        out += "Running: <code>java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup</code> <br>"
         ret, perror = static_methods.run_cup(self.subprocess, command, unique_dir)
         if not ret:
             out += perror
@@ -147,7 +147,7 @@ class assignment3:
         ########################### Compile lex, parser, symbol and user file ###########################
         os.system(f'cp {assignment_dir}/A3User.java {unique_dir}')
         command = 'javac A3.lex.java A3Parser.java A3Symbol.java A3User.java'
-        out += f'Running: {command}<br>'
+        out += f'Running: <code>{command}</code><br>'
         ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
         if not ret:
             out += perror
@@ -155,12 +155,14 @@ class assignment3:
             return out.replace('\n', '<br>')
         out += "All files compiled successfully.<br>"
         print("Compiling files ran fine")
-
+        print(self.debug_code)
         ########################### Run Code using A3User.java ###########################
-        for i in range(5):
-            out += f'Running A3_{i+1}.tiny <br>'
+        for i in range(10):
+            out += f'Running <code>java A3User A3_{i+1}.tiny</code> <br>'
             command = f'java A3User ../A3_{i+1}.tiny'
-            ret, perror = static_methods.run_code(self.subprocess, command, unique_dir)
+            ret, perror = static_methods.run_code(
+                    self.subprocess, command, unique_dir) if not self.debug_code else static_methods.debug_code(
+                            self.subprocess, command, unique_dir)
             if not ret:
                 out += perror
                 # static_methods.remove_submission(self.subprocess, unique_dir)

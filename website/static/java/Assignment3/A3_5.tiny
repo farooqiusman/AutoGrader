@@ -1,11 +1,10 @@
-/** CORRECT "PROGRAM" & * & % @ ! */ WITH QSTRING A41.INPUT = 10 RESULT = 110 
-   Boolean expression definition is extended. 
+/** CORRECT PROGRAM & * & % @ ! */ METHODS = 1 
 **/
 INT MAIN F()  
 BEGIN
 	INT X;
 	X :=3;
-	IF(TRUE) 
+	IF(X==3) 
 	BEGIN
         	READ(X,"../testcase/A4/A41");
 	END  ELSE BEGIN 

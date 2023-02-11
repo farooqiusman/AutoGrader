@@ -1,17 +1,13 @@
-
-INT MAIN F()  /** CORRECT "PROGRAM" & * & % @ ! */ WITH QSTRING**/
+INT MAIN F()  /** INCORRECT PROGRAM & * & % @ ! */ WITH QSTRING**/
 BEGIN
 	STRING x;
 	x := "100";
 	WRITE(x, "XKOUTPUT");
+	INT y;
+	y := F3(3,5);
 END
 
 INT F2()
-BEGIN
-	INT w;
-	w := 400;
-	REAL x;
-	REAL y;
 	x := 4.5;
 	IF(w == 400)
 	BEGIN
@@ -20,6 +16,7 @@ BEGIN
 	END
 END
 
-
-
-
+INT F3(INT x, INT y)
+BEGIN
+	RETURN x * y;
+END

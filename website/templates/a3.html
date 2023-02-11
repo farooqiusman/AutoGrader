@@ -8,7 +8,10 @@
         <h3> A3 </h3>
 		<p>Paste your code below to check what your mark will be.<br></p>
 		<p> Enter your student id without '@uwindsor.ca', for example farooqiu@uwindsor.ca would be farooqiu<br></p>
-		<p> uwinid: <input type="text" name="studendid" id="stdu" rows="1" style="width: 10%;"></input></p>
+		<p> uwinid: <input type="text" name="studendid" id="stdu" rows="1" style="width: 10%;"></input>
+			debug Code: <input type="checkbox" name="debugBox" id="debug"></input>
+		</p>
+
         <div class="row p-4">
             <div class="col-md-6">
                 <h3>A3.lex</h3>
@@ -51,16 +54,21 @@
             let lex = document.getElementById('a31').value;
 			let cup = document.getElementById('a32').value;
 			let stdu = document.getElementById('stdu').value;
+			let debug = document.getElementById('debug');
+			let debug_value = false;
             let resultElem = document.getElementById(`resa32`);
             let a3button = document.getElementById(`a3cup`);
 			a3button.setAttribute("disabled", true)
-
-
             resultElem.innerHTML = 'loading...'
+			if(debug.checked){
+				debug_value = true;
+			}else{
+				debug_value = false;
+			}
             fetch(`/run/a3`, {
                 method: 'POST',
                 body: JSON.stringify({code_lex: lex,
-				code_cup: cup, stdu_id: stdu}),
+				code_cup: cup, stdu_id: stdu, debug_box: debug_value}),
                 headers: {
                     'Content-Type': 'application/json'
                 }
