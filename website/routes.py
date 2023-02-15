@@ -92,5 +92,5 @@ def runa3():
     assig3 = assignment3(subprocess, code_lex, code_cup, stdu_id, debug_code)
     out = '<ul>'
     out += assig3.run_a3()
-    out += "<br><br> SUBMIT WORKED </ul>"
+    out += "</ul>"
     return out
