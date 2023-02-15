@@ -75,7 +75,7 @@ class static_methods:
         try:
             stdout, stderr = proc.communicate(timeout=15)
             error = stderr.decode('utf-8')
-            # print(std)
+            print(error)
             if "Syntax error" in error:
                 raise Exception()
         except subprocess.TimeoutExpired:
@@ -83,8 +83,8 @@ class static_methods:
             out += f"Error running: <code>{command}</code> took too long to run. <br>"
             return False, out
         except:
-            out += f"Error running command: <code>{command}</code><br>"
-            return False, out.replace('\n', '<br>')
+            out += f"<code>{error}</code><br>"
+            return True, out.replace('\n', '<br>')
         out += stdout.decode('utf-8')
         return True, out.replace('\n', '<br>')
     
@@ -97,7 +97,6 @@ class static_methods:
         try:
             stdout, stderr = proc.communicate(timeout=15)
             error = stderr.decode('utf-8')
-            # print(error)
             if "Syntax error" in error:
                 raise Exception()
         except subprocess.TimeoutExpired:
@@ -105,8 +104,19 @@ class static_methods:
             out += f"Error running: <code>{command}</code> took too long to run. <br>"
             return False, out
         except:
-            out += f"Error running command: <code>{command}<br>{error}</code><br>"
-            return False, out.replace('\n', '<br>')
+            count = 0
+            out += "Error in parsing printing last 20 tokens<br>"
+            splitted = error.split('\n')
+            for line in splitted:
+                if "Current token" in line:
+                    out += f'<code>{line}</code><br>'
+                    count += 1
+                if count == 20:
+                    break
+            index = splitted.index('Syntax error')
+            for i in range(index, len(splitted)):
+                out += f'<code>{splitted[i]}</code><br>'
+            return True, out.replace('\n', '<br>')
         out += stdout.decode('utf-8')
         return True, out.replace('\n', '<br>')
 
@@ -125,3 +135,29 @@ class static_methods:
         
         return True, out
 
+    @staticmethod
+    def nested_dict_maker(unique_dir):
+        nested_dct = {}
+        try:
+            with open(f"{unique_dir}/A3.output", 'r') as f:
+                for line in f:
+                    key, val = line.strip().split(":")
+
+                    nested_dct[key.strip()] = val.strip()
+        except IOError as e:
+            return False, e
+        
+        return True, nested_dct
+
+    @staticmethod 
+    def check_runs(output_dict, data, test_case):
+        output = ""
+        for key in data.keys():
+            if key not in output_dict.keys():
+                return False, f"Error: key: {key} not in {output_dict}, please rename.<br>"
+            elif int(data[key]) != int(output_dict[key]):
+                output += ("Expected output was: <br>&nbsp &nbsp &nbsp" 
+                "{1}<br> Actual output was: <br>" 
+                "&nbsp &nbsp &nbsp {2}.<br>".format(test_case, data, output_dict))
+                return False, output
+        return True, output
