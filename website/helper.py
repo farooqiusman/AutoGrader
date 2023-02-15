@@ -107,12 +107,20 @@ class static_methods:
             count = 0
             out += "Error in parsing printing last 20 tokens<br>"
             splitted = error.split('\n')
+            last_tokens = []
+            splitted.reverse()
             for line in splitted:
                 if "Current token" in line:
-                    out += f'<code>{line}</code><br>'
+                    last_tokens.append(line)
                     count += 1
                 if count == 20:
                     break
+
+            last_tokens.reverse()
+            for line in last_tokens:
+                out += f'<code>{line}</code><br>'
+            
+            splitted.reverse()
             index = splitted.index('Syntax error')
             for i in range(index, len(splitted)):
                 out += f'<code>{splitted[i]}</code><br>'
