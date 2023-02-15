@@ -7,6 +7,57 @@
         <br>
         <h3> A3 </h3>
 		<p>Paste your code below to check what your mark will be.<br></p>
+		<p> A3 is by far the most difficult assignment so please take the time to understand it.<br></p
+        <p> Here are input files that you can download
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_1.tiny') }}">A3_1.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_2.tiny') }}">A3_2.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_3.tiny') }}">A3_3.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_4.tiny') }}">A3_4.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_5.tiny') }}">A3_5.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_6.tiny') }}">A3_6.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_7.tiny') }}">A3_7.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_8.tiny') }}">A3_8.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_9.tiny') }}">A3_9.tiny</a>, 
+            <a href="{{ url_for('static', filename='java/Assignment3/A3_10.tiny') }}">A3_10.tiny</a>, 
+        </p>
+		<p>
+			Out of the 10 files posted 5 of the files follow the correct Tiny language syntax and 5 of them don't.<br>
+			Your program should be able to parse through all of the first 5 correctly returning the number of methods
+			and break for the second 5 cases.<br>
+		</p>
+		<h3> How to run your code: </h3>
+		    Setup JLex and JavaCup on your machine from the following link: <a href="https://blog.bornais.ca/2022/04/16/setting-up-jlex.html">JLex_Setup</a>
+			&nbsp&nbsp<a href="https://blog.bornais.ca/2022/04/17/setting-up-java-cup.html">JavaCup_Setup</a><br>
+            After both are setup run your program with the following lines:<br>
+            &nbsp&nbsp&nbsp&nbsp <code> java JLex.Main A3.lex <br> </code>
+			&nbsp&nbsp&nbsp&nbsp <code> java java_cup.Main -parser A3Parser -symbols A3Symbol < A3.cup </code><br>
+            &nbsp&nbsp&nbsp&nbsp <code> javac A3Parser.java A3Symbol.java A3User.java </code> <br>
+            &nbsp&nbsp&nbsp&nbsp <code> java A3User </code> <br>
+			You can also download A3User from the following link
+			<a href="{{ url_for('static', filename='java/Assignment3/A3User.java') }}">A3User.java</a>.<br><br>
+		<h3> How to debug your code: </h3>
+		<p>
+			When you run A3User.java it will use the parser generated from your cup file to parse through your inputfile.
+			Your parser consits of all the tiny language syntax rules and should your input file be correct according to 
+			the tiny lanugage syntax your parser will successfully return the number of methods. <br>
+			If your parse fails it will throw a parse error and it will <strong>NOT</strong> generate an output file.<br>
+			In order to debug you can either return the current token in your lex file, or look for <strong>Current Token is #</strong>
+			in your output.<br>
+			The autograder will print the last 20 tokens each token is grabbed from your A3Symbol.java. <br>
+			For example token #8 might be IF in your symbol file and will appear as <code> public static final int IF = 8;</code> in A3Symbol.java.<br>
+			Not everyone will have the same token numbers as they are generated differently on each run. <br>
+			Once you know which symbol your current token corresponds to you can look at that in your input file.
+			Example if the last token in your output before the "Syntax error" line is "Current token is # 8", <br>
+			and token 8 is IF in your A3Symbol.java then you know that your parser broke after reading IF from the input file. <br>
+			This means that there is probably something wrong with the way you defined your IF/ElSE rule in your cup file. <br>
+			You may need to note down 5-10 tokens depending on the size of the input file to get a rough idea of where the parse broke. <br>
+			Alternatively you can print out the current token in your lex file to find out where your parse broke. <br>
+		</p>
+
+		<h3> Running your code on the site: </h3>
+		<p>
+		To run your code on the site enter your student id, paste your lex file and your cup file. <br>
+		You can also check the debug box if you want to print the last 20 tokens and enable debugging for the parser. <br>
 		<p> Enter your student id without '@uwindsor.ca', for example farooqiu@uwindsor.ca would be farooqiu<br></p>
 		<p> uwinid: <input type="text" name="studendid" id="stdu" rows="1" style="width: 10%;"></input>
 			debug Code: <input type="checkbox" name="debugBox" id="debug"></input>

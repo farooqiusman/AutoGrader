@@ -25,6 +25,23 @@ class assignment3:
         except:
             return "", ""
 
+    def submit_score(self, name, user, grade):
+        try:
+            query = "INSERT INTO submissions (name,`user`, grade)"
+            query += "\nVALUES(%s, %s, %s);"
+            
+            value = [name, user, grade]
+            values = tuple(value)
+            c = self.sql_connection.cursor()
+            c.execute(query, values)
+            self.sql_connection.commit()
+            print("Inserted into db")
+
+        except:
+            return False
+
+        return True
+
     def generate_file_from_template(self, template_file, generated_file, code):
         out = ""
         try:
@@ -63,7 +80,7 @@ class assignment3:
             out += "Contact server owner.\n"
             return out.replace("\n", "<br>")
         
-        out += f'{name}, {uwinid}<br>'
+        out += f'Name: {name}<br>'
 
         if self.lex_code == "": 
             out += "Please submit your lex file"
@@ -146,7 +163,9 @@ class assignment3:
 
         ########################### Compile lex, parser, symbol and user file ###########################
         os.system(f'cp {assignment_dir}/A3User.java {unique_dir}')
-        command = 'javac A3.lex.java A3Parser.java A3Symbol.java A3User.java'
+        os.system(f'cp {assignment_dir}/A3UserDebug.java {unique_dir}')
+        debug = "A3User.java" if not self.debug_code else "A3UserDebug.java"
+        command = f'javac A3.lex.java A3Parser.java A3Symbol.java {debug}'
         out += f'Running: <code>{command}</code><br>'
         ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
         if not ret:
@@ -155,22 +174,56 @@ class assignment3:
             return out.replace('\n', '<br>')
         out += "All files compiled successfully.<br>"
         print("Compiling files ran fine")
-        print(self.debug_code)
+
         ########################### Run Code using A3User.java ###########################
+        count = 0
         for i in range(10):
-            out += f'Running <code>java A3User A3_{i+1}.tiny</code> <br>'
-            command = f'java A3User ../A3_{i+1}.tiny'
+            # check if output file exists 
+            if os.path.exists(f'{unique_dir}/A3.output'):
+                os.remove(f'{unique_dir}/A3.output')
+            
+            expected = ["Correct", "parse should pass"] if i < 5 else ["Incorrect", "parse should fail"]
+            out += f"<br> Running test Case {i+1}, {expected[0]} test case, {expected[1]}... <br>"
+            command = f'java A3User ../A3_{i+1}.tiny' if not self.debug_code else f'java A3UserDebug ../A3_{i+1}.tiny'
             ret, perror = static_methods.run_code(
                     self.subprocess, command, unique_dir) if not self.debug_code else static_methods.debug_code(
                             self.subprocess, command, unique_dir)
             if not ret:
                 out += perror
-                # static_methods.remove_submission(self.subprocess, unique_dir)
-            command = f'cat A3.output'
-            ret, perror = static_methods.run_process(self.subprocess, command, unique_dir)
+                static_methods.remove_submission(self.subprocess, unique_dir)
             out += perror
-            out += "<br>"
 
-        # self.remove_submission(unique_dir)
-        return out.replace('\n', '<br>')
+            # check outputs
+            with open(f'{assignment_dir}/answers.json', 'r') as json_file:
+                data = json.load(json_file) 
+
+            if os.path.exists(f'{unique_dir}/A3.output'):
+                ret, nested_dict = static_methods.nested_dict_maker(unique_dir)
+                if not ret:
+                    out += perror
+                    static_methods.remove_submission(self.subprocess, unique_dir)
+            else:
+                nested_dict = {"Number_of_methods":0}
+            
+            
+            ret, string_out = static_methods.check_runs(nested_dict, data[f"A3_{i+1}"], f"A3_{i+1}.tiny")
+            if ret and string_out == "":
+                string_out += "Test passed...<br>"
+                out += string_out
+                count +=1
+            else:
+                string_out += "Test failed...<br>"
+                out += string_out
+
+        ########################### Handle All test cases passed ###########################
+        final_out = f"<br> {count}/10 Test cases ran successfully see below: <br>"
+        if count == 10:
+            final_out += out + "<br> All Tests passed!<br>"
+        else:
+            final_out += out 
+        static_methods.remove_submission(self.subprocess, unique_dir)
+        if not self.submit_score(name, self.stduID, f'{count}/10'):
+            print("push to db failed")
+
+        return final_out.replace("\n", "<br>")
 
